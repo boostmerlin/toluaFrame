@@ -26,6 +26,50 @@ public static class LuaBinder
 		Lean_Touch_LeanFingerWrap.Register(L);
 		L.EndModule();
 		L.EndModule();
+		L.BeginModule("DG");
+		L.BeginModule("Tweening");
+		DG_Tweening_EaseWrap.Register(L);
+		DG_Tweening_DOTweenWrap.Register(L);
+		DG_Tweening_TweenWrap.Register(L);
+		DG_Tweening_SequenceWrap.Register(L);
+		DG_Tweening_TweenerWrap.Register(L);
+		DG_Tweening_LoopTypeWrap.Register(L);
+		DG_Tweening_PathModeWrap.Register(L);
+		DG_Tweening_PathTypeWrap.Register(L);
+		DG_Tweening_RotateModeWrap.Register(L);
+		L.RegFunction("TweenCallback", DG_Tweening_TweenCallback);
+		L.BeginModule("Core");
+		L.RegFunction("DOGetter_float", DG_Tweening_Core_DOGetter_float);
+		L.RegFunction("DOSetter_float", DG_Tweening_Core_DOSetter_float);
+		L.RegFunction("DOGetter_double", DG_Tweening_Core_DOGetter_double);
+		L.RegFunction("DOSetter_double", DG_Tweening_Core_DOSetter_double);
+		L.RegFunction("DOGetter_int", DG_Tweening_Core_DOGetter_int);
+		L.RegFunction("DOSetter_int", DG_Tweening_Core_DOSetter_int);
+		L.RegFunction("DOGetter_uint", DG_Tweening_Core_DOGetter_uint);
+		L.RegFunction("DOSetter_uint", DG_Tweening_Core_DOSetter_uint);
+		L.RegFunction("DOGetter_long", DG_Tweening_Core_DOGetter_long);
+		L.RegFunction("DOSetter_long", DG_Tweening_Core_DOSetter_long);
+		L.RegFunction("DOGetter_ulong", DG_Tweening_Core_DOGetter_ulong);
+		L.RegFunction("DOSetter_ulong", DG_Tweening_Core_DOSetter_ulong);
+		L.RegFunction("DOGetter_string", DG_Tweening_Core_DOGetter_string);
+		L.RegFunction("DOSetter_string", DG_Tweening_Core_DOSetter_string);
+		L.RegFunction("DOGetter_UnityEngine_Vector2", DG_Tweening_Core_DOGetter_UnityEngine_Vector2);
+		L.RegFunction("DOSetter_UnityEngine_Vector2", DG_Tweening_Core_DOSetter_UnityEngine_Vector2);
+		L.RegFunction("DOGetter_UnityEngine_Vector3", DG_Tweening_Core_DOGetter_UnityEngine_Vector3);
+		L.RegFunction("DOSetter_UnityEngine_Vector3", DG_Tweening_Core_DOSetter_UnityEngine_Vector3);
+		L.RegFunction("DOGetter_UnityEngine_Vector4", DG_Tweening_Core_DOGetter_UnityEngine_Vector4);
+		L.RegFunction("DOSetter_UnityEngine_Vector4", DG_Tweening_Core_DOSetter_UnityEngine_Vector4);
+		L.RegFunction("DOGetter_UnityEngine_Quaternion", DG_Tweening_Core_DOGetter_UnityEngine_Quaternion);
+		L.RegFunction("DOSetter_UnityEngine_Quaternion", DG_Tweening_Core_DOSetter_UnityEngine_Quaternion);
+		L.RegFunction("DOGetter_UnityEngine_Color", DG_Tweening_Core_DOGetter_UnityEngine_Color);
+		L.RegFunction("DOSetter_UnityEngine_Color", DG_Tweening_Core_DOSetter_UnityEngine_Color);
+		L.RegFunction("DOGetter_UnityEngine_Rect", DG_Tweening_Core_DOGetter_UnityEngine_Rect);
+		L.RegFunction("DOSetter_UnityEngine_Rect", DG_Tweening_Core_DOSetter_UnityEngine_Rect);
+		L.RegFunction("DOGetter_UnityEngine_RectOffset", DG_Tweening_Core_DOGetter_UnityEngine_RectOffset);
+		L.RegFunction("DOSetter_UnityEngine_RectOffset", DG_Tweening_Core_DOSetter_UnityEngine_RectOffset);
+		L.EndModule();
+		L.EndModule();
+		L.EndModule();
 		L.BeginModule("UnityEngine");
 		UnityEngine_CanvasWrap.Register(L);
 		UnityEngine_RectTransformWrap.Register(L);
@@ -114,49 +158,6 @@ public static class LuaBinder
 		LuaInterface_LuaInjectionStationWrap.Register(L);
 		LuaInterface_InjectTypeWrap.Register(L);
 		L.EndModule();
-		L.BeginModule("DG");
-		L.BeginModule("Tweening");
-		DG_Tweening_DOTweenWrap.Register(L);
-		DG_Tweening_TweenWrap.Register(L);
-		DG_Tweening_SequenceWrap.Register(L);
-		DG_Tweening_TweenerWrap.Register(L);
-		DG_Tweening_LoopTypeWrap.Register(L);
-		DG_Tweening_PathModeWrap.Register(L);
-		DG_Tweening_PathTypeWrap.Register(L);
-		DG_Tweening_RotateModeWrap.Register(L);
-		L.RegFunction("TweenCallback", DG_Tweening_TweenCallback);
-		L.BeginModule("Core");
-		L.RegFunction("DOGetter_float", DG_Tweening_Core_DOGetter_float);
-		L.RegFunction("DOSetter_float", DG_Tweening_Core_DOSetter_float);
-		L.RegFunction("DOGetter_double", DG_Tweening_Core_DOGetter_double);
-		L.RegFunction("DOSetter_double", DG_Tweening_Core_DOSetter_double);
-		L.RegFunction("DOGetter_int", DG_Tweening_Core_DOGetter_int);
-		L.RegFunction("DOSetter_int", DG_Tweening_Core_DOSetter_int);
-		L.RegFunction("DOGetter_uint", DG_Tweening_Core_DOGetter_uint);
-		L.RegFunction("DOSetter_uint", DG_Tweening_Core_DOSetter_uint);
-		L.RegFunction("DOGetter_long", DG_Tweening_Core_DOGetter_long);
-		L.RegFunction("DOSetter_long", DG_Tweening_Core_DOSetter_long);
-		L.RegFunction("DOGetter_ulong", DG_Tweening_Core_DOGetter_ulong);
-		L.RegFunction("DOSetter_ulong", DG_Tweening_Core_DOSetter_ulong);
-		L.RegFunction("DOGetter_string", DG_Tweening_Core_DOGetter_string);
-		L.RegFunction("DOSetter_string", DG_Tweening_Core_DOSetter_string);
-		L.RegFunction("DOGetter_UnityEngine_Vector2", DG_Tweening_Core_DOGetter_UnityEngine_Vector2);
-		L.RegFunction("DOSetter_UnityEngine_Vector2", DG_Tweening_Core_DOSetter_UnityEngine_Vector2);
-		L.RegFunction("DOGetter_UnityEngine_Vector3", DG_Tweening_Core_DOGetter_UnityEngine_Vector3);
-		L.RegFunction("DOSetter_UnityEngine_Vector3", DG_Tweening_Core_DOSetter_UnityEngine_Vector3);
-		L.RegFunction("DOGetter_UnityEngine_Vector4", DG_Tweening_Core_DOGetter_UnityEngine_Vector4);
-		L.RegFunction("DOSetter_UnityEngine_Vector4", DG_Tweening_Core_DOSetter_UnityEngine_Vector4);
-		L.RegFunction("DOGetter_UnityEngine_Quaternion", DG_Tweening_Core_DOGetter_UnityEngine_Quaternion);
-		L.RegFunction("DOSetter_UnityEngine_Quaternion", DG_Tweening_Core_DOSetter_UnityEngine_Quaternion);
-		L.RegFunction("DOGetter_UnityEngine_Color", DG_Tweening_Core_DOGetter_UnityEngine_Color);
-		L.RegFunction("DOSetter_UnityEngine_Color", DG_Tweening_Core_DOSetter_UnityEngine_Color);
-		L.RegFunction("DOGetter_UnityEngine_Rect", DG_Tweening_Core_DOGetter_UnityEngine_Rect);
-		L.RegFunction("DOSetter_UnityEngine_Rect", DG_Tweening_Core_DOSetter_UnityEngine_Rect);
-		L.RegFunction("DOGetter_UnityEngine_RectOffset", DG_Tweening_Core_DOGetter_UnityEngine_RectOffset);
-		L.RegFunction("DOSetter_UnityEngine_RectOffset", DG_Tweening_Core_DOSetter_UnityEngine_RectOffset);
-		L.EndModule();
-		L.EndModule();
-		L.EndModule();
 		L.BeginModule("System");
 		L.RegFunction("Action", System_Action);
 		L.RegFunction("Predicate_int", System_Predicate_int);
@@ -184,276 +185,6 @@ public static class LuaBinder
 		L.AddPreLoad("UnityEngine.Rigidbody", LuaOpen_UnityEngine_Rigidbody, typeof(UnityEngine.Rigidbody));
 		L.EndPreLoad();
 		Debugger.Log("Register lua type cost time: {0}", Time.realtimeSinceStartup - t);
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_UI_InputField_OnValidateInput(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.UI.InputField.OnValidateInput>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.UI.InputField.OnValidateInput>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_Events_UnityAction(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.Events.UnityAction>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.Events.UnityAction>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_Canvas_WillRenderCanvases(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.Canvas.WillRenderCanvases>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.Canvas.WillRenderCanvases>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_RectTransform_ReapplyDrivenProperties(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.RectTransform.ReapplyDrivenProperties>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.RectTransform.ReapplyDrivenProperties>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_Camera_CameraCallback(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.Camera.CameraCallback>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.Camera.CameraCallback>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_Application_LowMemoryCallback(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.Application.LowMemoryCallback>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.Application.LowMemoryCallback>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_Application_AdvertisingIdentifierCallback(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.Application.AdvertisingIdentifierCallback>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.Application.AdvertisingIdentifierCallback>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_Application_LogCallback(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.Application.LogCallback>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.Application.LogCallback>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_AudioClip_PCMReaderCallback(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMReaderCallback>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMReaderCallback>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
-	}
-
-	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-	static int UnityEngine_AudioClip_PCMSetPositionCallback(IntPtr L)
-	{
-		try
-		{
-			int count = LuaDLL.lua_gettop(L);
-			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
-
-			if (count == 1)
-			{
-				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMSetPositionCallback>.Create(func);
-				ToLua.Push(L, arg1);
-			}
-			else
-			{
-				LuaTable self = ToLua.CheckLuaTable(L, 2);
-				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMSetPositionCallback>.Create(func, self);
-				ToLua.Push(L, arg1);
-			}
-			return 1;
-		}
-		catch(Exception e)
-		{
-			return LuaDLL.toluaL_exception(L, e);
-		}
 	}
 
 	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
@@ -1229,6 +960,276 @@ public static class LuaBinder
 			{
 				LuaTable self = ToLua.CheckLuaTable(L, 2);
 				Delegate arg1 = DelegateTraits<DG.Tweening.Core.DOSetter<UnityEngine.RectOffset>>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_UI_InputField_OnValidateInput(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.UI.InputField.OnValidateInput>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.UI.InputField.OnValidateInput>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_Events_UnityAction(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.Events.UnityAction>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.Events.UnityAction>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_Canvas_WillRenderCanvases(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.Canvas.WillRenderCanvases>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.Canvas.WillRenderCanvases>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_RectTransform_ReapplyDrivenProperties(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.RectTransform.ReapplyDrivenProperties>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.RectTransform.ReapplyDrivenProperties>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_Camera_CameraCallback(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.Camera.CameraCallback>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.Camera.CameraCallback>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_Application_LowMemoryCallback(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.Application.LowMemoryCallback>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.Application.LowMemoryCallback>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_Application_AdvertisingIdentifierCallback(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.Application.AdvertisingIdentifierCallback>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.Application.AdvertisingIdentifierCallback>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_Application_LogCallback(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.Application.LogCallback>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.Application.LogCallback>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_AudioClip_PCMReaderCallback(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMReaderCallback>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMReaderCallback>.Create(func, self);
+				ToLua.Push(L, arg1);
+			}
+			return 1;
+		}
+		catch(Exception e)
+		{
+			return LuaDLL.toluaL_exception(L, e);
+		}
+	}
+
+	[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+	static int UnityEngine_AudioClip_PCMSetPositionCallback(IntPtr L)
+	{
+		try
+		{
+			int count = LuaDLL.lua_gettop(L);
+			LuaFunction func = ToLua.CheckLuaFunction(L, 1);
+
+			if (count == 1)
+			{
+				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMSetPositionCallback>.Create(func);
+				ToLua.Push(L, arg1);
+			}
+			else
+			{
+				LuaTable self = ToLua.CheckLuaTable(L, 2);
+				Delegate arg1 = DelegateTraits<UnityEngine.AudioClip.PCMSetPositionCallback>.Create(func, self);
 				ToLua.Push(L, arg1);
 			}
 			return 1;

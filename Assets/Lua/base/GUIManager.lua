@@ -55,7 +55,7 @@ local function HideAnim(view, callback)
        -- t1:SetEase(Ease.OutQuad)
         t1:Play()
     end
-    local t2 = view.transform:DOScale(1.1, 0.1):SetUpdate(true):SetEase(Ease.OutExpo):OnComplete(callback)
+    local t2 = view.transform:DOScale(1.1, 0.1):SetUpdate(true):SetEase(DG.Tweening.Ease.OutExpo):OnComplete(callback)
     t2:SetDelay(0.07)
 end
 

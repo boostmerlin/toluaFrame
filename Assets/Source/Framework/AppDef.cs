@@ -8,22 +8,18 @@ public class AppDef
 #if UNITY_EDITOR
     public static bool DebugMode = true;                          //调试模式-用于内部测试
 #else
-		public static bool DebugMode = false;
+	public static bool DebugMode = false;
 #endif
     //是否从StreamAssets下读取资源
     public static bool StreamAssetsMode = !DebugMode;
 
 #if USE_DEVICE_ID
-        public static bool useDeviceId = true;
+    public static bool useDeviceId = true;
 #else
     public static bool useDeviceId = false;
 #endif
 
     public const bool LuaBundleMode = false;                    //Lua代码AssetBundle模式
-                                                                /// <summary>
-                                                                /// 如果开启更新模式，前提必须启动框架自带服务器端。
-                                                                /// 否则就需要自己将StreamingAssets里面的所有内容
-                                                                /// 复制到自己的Webserver上面，并修改下面的WebUrl。
                                                                 /// </summary>
     public const bool UpdateMode = false;                       //更新模式-默认关闭 
     public const bool LuaByteMode = false;                       //Lua字节码模式-默认关闭 
