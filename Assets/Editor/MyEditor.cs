@@ -11,45 +11,6 @@ using UnityEngine.UI;
 
 public class MyEditor : EditorWindow
 {
-    [MenuItem("GameObject/UI/IButton")]
-    public static void CreateIButton()
-    {
-        Transform parent = Selection.activeTransform;
-        GameObject obj = new GameObject("IButton", typeof(Image), typeof(IButton));
-        obj.transform.SetParent(parent, false);
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            rect.sizeDelta = new Vector2(200, 50);
-        }
-    }
-
-    [MenuItem("GameObject/UI/IButton(with text)")]
-    public static void CreateIButtonWithText()
-    {
-        Transform parent = Selection.activeTransform;
-        GameObject obj = new GameObject("IButton", typeof(Image), typeof(IButton));
-        obj.transform.SetParent(parent, false);
-        RectTransform rect = obj.GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            rect.sizeDelta = new Vector2(200, 50);
-        }
-
-        GameObject text = new GameObject("text", typeof(Text));
-        text.transform.SetParent(obj.transform, false);
-        RectTransform rect1 = text.GetComponent<RectTransform>();
-        rect1.anchorMin = Vector2.zero;
-        rect1.anchorMax = Vector2.one;
-        rect1.offsetMin = Vector2.one;
-        rect1.offsetMax = Vector2.one * -1;
-        Text txt = text.GetComponent<Text>();
-        txt.text = "IButton";
-        txt.color = Color.black;
-        txt.fontSize = 22;
-        txt.alignment = TextAnchor.MiddleCenter;
-    }
-
     [MenuItem(EditorHelper.Prefix_FrameToolkit + "Generate Config lua File", priority = 1)]
     public static void BuildConfigLuaFile()
     {
@@ -88,9 +49,6 @@ public class MyEditor : EditorWindow
 
         AssetDatabase.Refresh();
     }
-
-
-
 
     [MenuItem("Assets/Create/Create Lua View")]
     public static void CreateViewScript()

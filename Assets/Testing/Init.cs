@@ -9,8 +9,4 @@ public class Init : MonoBehaviour {
         Camera.main.GetComponent<MapMove>().SetMapSize(gameObject);
 	}
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
 }
