@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Ginkgo
 {
@@ -15,7 +13,6 @@ namespace Ginkgo
     {
         void Subscribe(IObserver<T> observer);
     }
-
     public interface ISubject<T> : IObserver<T>, IObservable<T>
     {
     }

@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Ginkgo;
 using LuaFramework;
@@ -124,7 +122,7 @@ public class AppFacade : IEventService
         this.OnEvent<TEvent>().Subscribe(ob);
     }
 
-    public void Subscribe<TEvent>(Action<TEvent> action)
+    public void Subscribe<TEvent>(System.Action<TEvent> action)
     {
         this.OnEvent<TEvent>().Subscribe(action);
     }

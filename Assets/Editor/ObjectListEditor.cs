@@ -1,103 +1,88 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEditor;
 
 [CustomEditor(typeof(ObjectList), true)]
-public class ObjectListEditor : Editor 
+public class ObjectListEditor : Editor
 {
     private SerializedProperty objType;
-    private SerializedProperty currentObjectList;
     private SerializedProperty nativeSize;
     private SerializedProperty includeChildren;
-    private SerializedProperty enableAnamtion;
+    private SerializedProperty enableAnimation;
     private SerializedProperty loopAnimation;
     private SerializedProperty frames;
     private SerializedProperty index;
+    private SerializedProperty objects;
+    private SerializedProperty autoApplyObject;
 
-
-    void OnEnable() 
+    void OnEnable()
 	{
-        objType = serializedObject.FindProperty("objectType");
+        objType = serializedObject.FindProperty("_objectType");
         index = serializedObject.FindProperty("_index");
 		nativeSize =  serializedObject.FindProperty("nativeSize");
 		includeChildren = serializedObject.FindProperty("includeChildren");
 
         frames = serializedObject.FindProperty("frames");
         loopAnimation = serializedObject.FindProperty("loopAnimation");
-        enableAnamtion = serializedObject.FindProperty("_enableAnimation");
+        enableAnimation = serializedObject.FindProperty("_enableAnimation");
+        autoApplyObject = serializedObject.FindProperty("autoApplyObject");
+        objects = serializedObject.FindProperty("objects");
     }
 
-    private void PerformDrag()
+    private bool IsObjectTypeConsistent()
     {
-        int intType = objType.enumValueIndex;
-        if (intType == 1
-            || intType == 0)
+        Type lastType= null;
+        foreach (var obj in DragAndDrop.objectReferences)
+        {
+            if (lastType == null) lastType = obj.GetType();
+            if (lastType != obj.GetType())
+            {
+                return false;
+            }
+        }
+        var objectType = GetCurrentType().ToString();
+        var name = lastType.Name;
+        return name.Contains(objectType) || (name.Contains("Texture") && objectType == "Sprite");
+    }
+
+    private void PerformDrag(SerializedProperty currentObjectList)
+    {
+        //only support multiple here
+        if (DragAndDrop.objectReferences.Length <= 1)
         {
             return;
         }
         var eventType = Event.current.type;
-        if (eventType == EventType.DragUpdated || eventType == EventType.DragPerform)
+        if (eventType != EventType.DragUpdated && eventType != EventType.DragPerform) return;
+        DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+        if (eventType != EventType.DragPerform) return;
+        if (!IsObjectTypeConsistent())
         {
-            DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-            if (eventType == EventType.DragPerform)
+            Debug.LogWarning("Object Type Not consistent!");
+            return;
+        }
+        DragAndDrop.AcceptDrag();
+        currentObjectList.ClearArray();
+        foreach (var obj in DragAndDrop.objectReferences)
+        {
+            int j = currentObjectList.arraySize;
+            currentObjectList.InsertArrayElementAtIndex(j);
+            var sp = currentObjectList.GetArrayElementAtIndex(j);
+            if (obj is Texture2D)
             {
-                DragAndDrop.AcceptDrag();
-                if (DragAndDrop.objectReferences.Length > 1)
-                {
-                    currentObjectList.ClearArray();
-                    List<string> list = new List<string>();
-                    foreach (var obj in DragAndDrop.objectReferences)
-                    {
-                        if (list.Contains(obj.name))
-                        {
-                            continue;
-                        }
-                        int j = currentObjectList.arraySize;
-                        currentObjectList.InsertArrayElementAtIndex(j);
-                        var sp = currentObjectList.GetArrayElementAtIndex(j);
-                        if (obj is Texture2D)
-                        {
-                            sp.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GetAssetPath(obj));
-                        }
-                        else
-                        {
-                            sp.objectReferenceValue = obj;
-                        }
-                        list.Add(obj.name);
-                    }
-                    serializedObject.ApplyModifiedProperties();
-                    Event.current.Use();
-                }
+                sp.objectReferenceValue = AssetDatabase.LoadAssetAtPath<Sprite>(AssetDatabase.GetAssetPath(obj));
+            }
+            else
+            {
+                sp.objectReferenceValue = obj;
             }
         }
+        Event.current.Use();
     }
 
-	public override void OnInspectorGUI()
-	{
-		serializedObject.Update();
-        currentObjectList = serializedObject.FindProperty(ObjectList.propertyName[objType.enumValueIndex]);
-		EditorGUILayout.PropertyField(objType, new GUIContent("Object Type"));
-		EditorGUILayout.PropertyField(index, new GUIContent("index", "当前索引"));
-        EditorGUILayout.PropertyField(enableAnamtion, new GUIContent("enableAnamtion", "是否动画"));
-
-        if (enableAnamtion.boolValue)
-        {
-            EditorGUILayout.PropertyField(frames, new GUIContent("frames", "动画帧率"));
-            EditorGUILayout.PropertyField(loopAnimation, new GUIContent("loopAnimation", "动画循环"));
-        }
-
-        int intType = objType.enumValueIndex;
-        switch ((ObjectList.ObjectType)intType)
-        {
-            case ObjectList.ObjectType.Image:
-            case ObjectList.ObjectType.RawImage:
-                EditorGUILayout.PropertyField(nativeSize);
-                break;
-            case ObjectList.ObjectType.Shader:
-                EditorGUILayout.PropertyField(includeChildren);
-                break;
-        }
-        if (EditorGUILayout.PropertyField(currentObjectList, new GUIContent(ObjectList.propertyName[intType])))
+    private void DrawObjects(SerializedProperty currentObjectList)
+    {
+        if (EditorGUILayout.PropertyField(currentObjectList))
         {
             EditorGUI.indentLevel = 1;
             currentObjectList.arraySize = EditorGUILayout.IntField("Size: ", currentObjectList.arraySize);
@@ -126,6 +111,51 @@ public class ObjectListEditor : Editor
                 EditorGUILayout.EndHorizontal();
             }
         }
+    }
+
+    private void DrawGeneralProperty()
+    {
+        EditorGUILayout.PropertyField(objType, new GUIContent("Object Type"));
+        EditorGUILayout.PropertyField(index, new GUIContent("Index", "当前索引"));
+        EditorGUILayout.PropertyField(autoApplyObject, new GUIContent("Apply Default Usage"));
+        EditorGUILayout.PropertyField(enableAnimation, new GUIContent("Enable Animation", "是否动画"));
+        if (enableAnimation.boolValue)
+        {
+            EditorGUILayout.PropertyField(frames, new GUIContent("Frames", "动画帧率"));
+            EditorGUILayout.PropertyField(loopAnimation, new GUIContent("Loop Animation", "动画循环"));
+        }
+    }
+
+    private void DrawTypeSpecificProperty(ObjectList.ObjectType objectType)
+    {
+        switch (objectType)
+        {
+            case ObjectList.ObjectType.Sprite:
+                EditorGUILayout.PropertyField(nativeSize);
+                break;
+            case ObjectList.ObjectType.Shader:
+            case ObjectList.ObjectType.Material:
+                EditorGUILayout.PropertyField(includeChildren, new GUIContent("Include Children", "设置孩子"));
+                break;
+        }
+    }
+
+    private ObjectList.ObjectType GetCurrentType()
+    {
+        int intType = objType.enumValueIndex;
+        var currentType = (ObjectList.ObjectType) intType;
+        return currentType;
+    }
+
+	public override void OnInspectorGUI()
+	{
+		serializedObject.Update();
+        var currentType = GetCurrentType();
+        var currentObjectList = objects.FindPropertyRelative(currentType.ToString());
+        PerformDrag(currentObjectList);
+        DrawGeneralProperty();
+        DrawTypeSpecificProperty(currentType);
+        DrawObjects(currentObjectList);
         serializedObject.ApplyModifiedProperties();
     }
 }

@@ -619,6 +619,7 @@ namespace UnityEngine.UI
         private RectTransform InstantiateNextItem(int itemIdx)
         {            
             RectTransform nextItem = prefabSource.GetObject().GetComponent<RectTransform>();
+            Debug.LogError(content);
             nextItem.transform.SetParent(content, false);
             nextItem.gameObject.SetActive(true);
             dataSource.ProvideData(nextItem, itemIdx);

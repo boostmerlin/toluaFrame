@@ -1,4 +1,5 @@
-﻿namespace Ginkgo
+﻿using System;
+namespace Ginkgo
 {
     public interface IEventService
     {

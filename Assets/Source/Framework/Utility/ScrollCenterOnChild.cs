@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System;
 
 /// <summary>
-/// 
+///
 /// UGUI ScrollRect 滑动元素居中
 /// </summary>
 public class ScrollCenterOnChild : MonoBehaviour, IBeginDragHandler, IEndDragHandler

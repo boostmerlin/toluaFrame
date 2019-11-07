@@ -1,56 +1,96 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
-//#if UNITY_EDITOR
-//using UnityEditor;
-//#endif
+using Object = System.Object;
 
-[ExecuteInEditMode]
 public class ObjectList : MonoBehaviour
 {
     public enum ObjectType
     {
         GameObject = 0,
-        Text,
-        Image,
-        RawImage,
-        Sprite2D,
-        Shader = 5,
+        Text = 1,
+        Texture = 2,
+        Sprite = 3,
+        Shader = 4,
+        Material = 5,
+        AudioClip = 6,
     }
 
-    [SerializeField]
-    private Sprite[] sprites;
-    [SerializeField]
-    private Texture[] textures;
-    [SerializeField]
-    private string[] texts;
-    [SerializeField]
-    private Shader[] shaders;
-    [SerializeField]
-    private GameObject[] gameObjects;
+    //Keep ObjectUnion FieldName equal ObjectType Name
+    [Serializable]
+    public struct ObjectUnion
+    {
+        public List<GameObject> GameObject;
+        public List<string> Text;
+        public List<Texture> Texture;
+        public List<Sprite> Sprite;
+        public List<Shader> Shader;
+        public List<AudioClip> AudioClip;
+        public List<Material> Material;
+    }
 
-    [SerializeField]
-    private ObjectType objectType = ObjectType.GameObject;
-    [SerializeField]
-    private int _index;
+    private static readonly Type[][] targetUserType =
+    {
+        null,
+        new[] {typeof(Text)},
+        new[] {typeof(RawImage)},
+        new[] {typeof(Image), typeof(SpriteRenderer)},
+        new[] {typeof(Graphic)},
+        new[] {typeof(Graphic)},
+        new[] {typeof(AudioSource)}
+    };
 
-    private Dictionary<string, Material> materials = null;
+    private IList GetTargetObjects()
+    {
+        switch (_objectType)
+        {
+            case ObjectType.GameObject:
+                return objects.GameObject;
+            case ObjectType.Text:
+                return objects.Text;
+            case ObjectType.Texture:
+                return objects.Texture;
+            case ObjectType.Sprite:
+                return objects.Sprite;
+            case ObjectType.Shader:
+                return objects.Shader;
+            case ObjectType.Material:
+                return objects.Material;
+            case ObjectType.AudioClip:
+                return objects.AudioClip;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    [SerializeField] private ObjectType _objectType = ObjectType.GameObject;
+
+    public ObjectType objectType => _objectType;
+
+    public ObjectUnion objects;
+
+    [SerializeField] private int _index;
 
     public UnityAction<GameObject, int, int> onIndexChanged;
+    private Coroutine animationRoutine;
 
-    public bool nativeSize = false;
-    public bool includeChildren = false;
+    public bool autoApplyObject = true;
+    public bool nativeSize;
+    public bool includeChildren;
     [SerializeField]
-    private bool _enableAnimation = false;
+    private bool _enableAnimation;
+
     public bool enableAnimation
     {
-        get
-        {
-            return _enableAnimation;
-        }
+        get => _enableAnimation;
         set
         {
+            _enableAnimation = value;
             if (value)
             {
                 StartAnimation();
@@ -59,18 +99,17 @@ public class ObjectList : MonoBehaviour
             {
                 StopAnimation();
             }
-            _enableAnimation = value;
         }
     }
+
     public bool loopAnimation;
     public int frames = 5;
 
+    private float frameRate => 1.0f / frames;
+
     public int index
     {
-        get
-        {
-            return _index;
-        }
+        get => _index;
         set
         {
             if (value == _index)
@@ -79,7 +118,17 @@ public class ObjectList : MonoBehaviour
         }
     }
 
-    void Awake()
+    public bool outBound
+    {
+        get
+        {
+            var list = GetTargetObjects();
+            if (list == null || list.Count == 0) return true;
+            return _index < 0 || _index >= list.Count;
+        }
+    }
+
+    void Start()
     {
         UpdateIndex(_index);
     }
@@ -97,323 +146,255 @@ public class ObjectList : MonoBehaviour
         StopAnimation();
     }
 
+    public List<T> GetTargetObjects<T>()
+    {
+        return GetTargetObjects() as List<T>;
+    }
+
     private void StopAnimation()
     {
-        CancelInvoke("AnimationUpdate");
+        if (animationRoutine != null)
+            StopCoroutine(animationRoutine);
     }
+
     private void StartAnimation()
     {
-        if (IsInvoking("AnimationUpdate"))
-        {
-            StopAnimation();
-        }
-        float t = 1.0f / frames;
-        InvokeRepeating("AnimationUpdate", t, t);
+        StopAnimation();
+        animationRoutine = StartCoroutine(AnimationUpdate());
     }
 
-    private void AnimationUpdate()
+    private IEnumerator AnimationUpdate()
     {
-        int index = _index + 1;
-        if (!this.UpdateIndex(index))
+        while (true)
         {
-            StopAnimation();
+            yield return new WaitForSeconds(frameRate);
+            int index = _index + 1;
+            if (!UpdateIndex(index))
+            {
+                StopAnimation();
+            }
         }
     }
 
-    private bool CheckBounds(object[] objs, ref int value)
+    private bool CheckBounds(ICollection list, ref int value)
     {
-        if (objs == null || objs.Length == 0)
+        if (list == null || list.Count == 0)
         {
             return false;
         }
-        if (value >= objs.Length || value < 0)
+
+        if (value >= list.Count || value < 0)
         {
             if (!loopAnimation)
                 return false;
-            else
-                value = 0;
+            value = 0;
         }
+
         return true;
+    }
+
+    private object GetComponent()
+    {
+        int typeIndex = (int) _objectType;
+        if (typeIndex < 0 || typeIndex >= targetUserType.Length) return null;
+        var types = targetUserType[typeIndex];
+        if (types == null) return null;
+        foreach (var t in targetUserType[typeIndex])
+        {
+            var c = GetComponent(t);
+            if (c) return c;
+        }
+
+        return null;
+    }
+
+    private delegate void ObjectUser(ObjectList ins, object user, object objectValue, int objectIndex);
+
+    private static readonly Dictionary<ObjectType, ObjectUser> objectUserMap = new Dictionary<ObjectType, ObjectUser>
+    {
+        {ObjectType.Text, TextUser},
+        {ObjectType.Material, MaterialUser},
+        {ObjectType.Shader, ShaderUser},
+        {ObjectType.Sprite, SpriteUser},
+        {ObjectType.Texture, RawImageUser},
+        {ObjectType.GameObject, GameObjectUser},
+        {ObjectType.AudioClip, AudioClipUser},
+    };
+
+    private static void TextUser(ObjectList ins, object user, object value, int _)
+    {
+        var text = user as Text;
+        if (text == null) return;
+        text.text = (string)value;
+    }
+
+    private static void RawImageUser(ObjectList ins, object user, object value, int _)
+    {
+        var img = user as RawImage;
+        if(img == null) return;
+        img.texture = (Texture)value;
+        if (ins.nativeSize)
+            img.SetNativeSize();
+    }
+
+    private static void SpriteUser(ObjectList ins, object user, object value, int _)
+    {
+        if(user == null) return;
+        if (user is Image img)
+        {
+            img.sprite = value as Sprite;
+            if (ins.nativeSize)
+                img.SetNativeSize();
+        }
+        else if (user is SpriteRenderer sr)
+        {
+            sr.sprite = value as Sprite;
+        }
+    }
+
+    private static void ShaderUser(ObjectList ins, object user, object value, int objectIndex)
+    {
+        if(user == null) return;
+        var material = ins.GetMaterial(value as Shader, objectIndex);
+        MaterialUser(ins, user, material, objectIndex);
+    }
+
+    private static void MaterialUser(ObjectList ins, object user, object value, int objectIndex)
+    {
+        Graphic graphic = user as Graphic;
+        ins.SetGraphicMaterial(graphic, value as Material);
+    }
+
+    private static void AudioClipUser(ObjectList ins, object user, object value, int objectIndex)
+    {
+        var source = user as AudioSource;
+        if(source == null) return;
+        source.clip = (AudioClip)value;
+    }
+
+    private static void GameObjectUser(ObjectList ins, object _, object value, int objectIndex)
+    {
+        var lastIndex = ins.index;
+        var list = ins.GetTargetObjects<GameObject>();
+        if (lastIndex != objectIndex && lastIndex>=0 && lastIndex < list.Count)
+        {
+            list[lastIndex].SetActive(false);
+        }
+
+        var go = value as GameObject;
+        if(go)
+            go.SetActive(true);
     }
 
     private bool UpdateIndex(int value)
     {
-        if (objectType == ObjectType.Text)
+        var list = GetTargetObjects();
+        //reach end.
+        if (!CheckBounds(list, ref value))
         {
-            if (!CheckBounds(texts, ref value))
-                return false;
-
-            Text text = GetComponent<Text>();
-            if (text != null)
-                text.text = texts[value];
+            return false;
         }
-        else if (objectType == ObjectType.Image)
+        if (autoApplyObject)
         {
-            if (!CheckBounds(sprites, ref value))
-                return false;
-
-            Image image = GetComponent<Image>();
-            if (image != null)
-            {
-                image.sprite = sprites[value];
-                image.enabled = sprites[value] != null;
-                if (nativeSize)
-                    image.SetNativeSize();
-            }
+            var user = GetComponent();
+            objectUserMap[_objectType](this, user, list[value], value);
         }
-        else if (objectType == ObjectType.RawImage)
-        {
-            if (!CheckBounds(textures, ref value))
-                return false;
-            RawImage image = GetComponent<RawImage>();
-            if (image != null)
-            {
-                image.texture = textures[value];
-                image.enabled = textures[value] != null;
-                if (nativeSize)
-                    image.SetNativeSize();
-            }
-        }
-        else if (objectType == ObjectType.Sprite2D)
-        {
-            if (!CheckBounds(sprites, ref value))
-                return false;
-            SpriteRenderer render = GetComponent<SpriteRenderer>();
-            if (render != null)
-            {
-                render.sprite = sprites[value];
-                render.enabled = sprites[value] != null;
-            }
-        }
-        else if (objectType == ObjectType.Shader)
-        {
-            if (!CheckBounds(shaders, ref value))
-                return false;
-            SetMaskableGraphicMaterial(transform, shaders[value]);
-        }
-        else
-        {
-            if (!CheckBounds(gameObjects, ref value))
-                return false;
-            for (int i = 0; i < gameObjects.Length; ++i)
-            {
-                if (i != value && gameObjects[i] != null && gameObjects[i].activeSelf)
-                    gameObjects[i].SetActive(false);
-            }
-            if (gameObjects[value] != null)
-                gameObjects[value].SetActive(true);
-        }
-
-
         if (_index != value)
         {
-            if (onIndexChanged != null)
-                onIndexChanged(gameObject, _index, value);
+            onIndexChanged?.Invoke(gameObject, _index, value);
             _index = value;
         }
         return true;
     }
 
-    public void AddObject(GameObject obj)
-    {
-        if (objectType != ObjectType.GameObject)
-            return;
-        if (gameObjects == null)
-            gameObjects = new GameObject[] { obj };
-        else
-        {
-            int len = gameObjects.Length;
-            GameObject[] list = new GameObject[len + 1];
-            gameObjects.CopyTo(list, 0);
-            list[len] = obj;
-            gameObjects = list;
-        }
-    }
-
-    public void AddObject(Sprite obj)
-    {
-        if (objectType != ObjectType.Sprite2D && objectType != ObjectType.Image)
-            return;
-        if (sprites == null)
-            sprites = new Sprite[] { obj };
-        else
-        {
-            int len = sprites.Length;
-            Sprite[] list = new Sprite[len + 1];
-            sprites.CopyTo(list, 0);
-            list[len] = obj;
-            sprites = list;
-        }
-    }
-
-    public void AddObject(Texture obj)
-    {
-        if (objectType != ObjectType.RawImage)
-            return;
-        if (textures == null)
-            textures = new Texture[] { obj };
-        else
-        {
-            int len = textures.Length;
-            Texture[] list = new Texture[len + 1];
-            textures.CopyTo(list, 0);
-            list[len] = obj;
-            textures = list;
-        }
-    }
-    public void AddObject(Shader obj)
-    {
-        if (shaders == null)
-            shaders = new Shader[] { obj };
-        else
-        {
-            int len = shaders.Length;
-            Shader[] list = new Shader[len + 1];
-            shaders.CopyTo(list, 0);
-            list[len] = obj;
-            shaders = list;
-        }
-    }
-    public void AddObject(string obj)
-    {
-        if (texts == null)
-            texts = new string[] { obj };
-        else
-        {
-            int len = texts.Length;
-            string[] list = new string[len + 1];
-            texts.CopyTo(list, 0);
-            list[len] = obj;
-            texts = list;
-        }
-    }
-
-
-    private Material GetInteractableMaterial(Shader shader)
+    private Material GetMaterial(Shader shader, int index)
     {
         if (shader == null)
         {
             return null;
         }
-        if (materials == null)
-            materials = new Dictionary<string, Material>();
-        if (!materials.ContainsKey(shader.name))
-            materials[shader.name] = new Material(shader);
-        return materials[shader.name];
+        if (objects.Material == null)
+        {
+            objects.Material = new List<Material>(4);
+        }
+        var list = objects.Material;
+        if (index >= list.Count)
+        {
+            for (var i = list.Count; i <= index; i++)
+            {
+                list.Add(null);
+            }
+        }
+        if(list[index] == null)
+            list[index] = new Material(shader);
+        return list[index];
     }
 
-    private void SetMaskableGraphicMaterial(Transform tran, Shader shader)
+    private void SetGraphicMaterial(Graphic graphic, Material material)
     {
-        MaskableGraphic graphic = tran.GetComponent<MaskableGraphic>();
-        if (graphic != null)
-            graphic.material = GetInteractableMaterial(shader);
-        if (includeChildren)
+        if (graphic == null) return;
+        graphic.material = material;
+        if (!includeChildren) return;
+        var trans = graphic.transform;
+        foreach (Transform t in trans)
         {
-            for (int i = 0; i < tran.childCount; ++i)
-                SetMaskableGraphicMaterial(tran.GetChild(i), shader);
+            SetGraphicMaterial(t.GetComponent<Graphic>(), material);
         }
     }
 
 #if UNITY_EDITOR
-    private T AddComponent<T>() where T : Component
+
+    private void OnUpdate()
     {
-        T com = gameObject.GetComponent<T>();
-        if (com == null)
-        {
-            com = gameObject.AddComponent<T>();
-        }
-        return com;
+        UpdateIndex(_index);
     }
-    private void AddComponent()
+    private void OnValidate()
     {
-        if (objectType == ObjectType.Text)
+        ClearFields(objectType);
+        if (objectType == ObjectType.GameObject)
         {
-            AddComponent<Text>();
+            disableAll();
         }
-        else if (objectType == ObjectType.Image)
+
+        var list = GetTargetObjects();
+        int n = list?.Count ?? 0;
+        _index = Mathf.Clamp(_index, 0, n-1);
+
+        if(!EditorApplication.isPlayingOrWillChangePlaymode)
+            EditorApplication.delayCall += OnUpdate;
+
+        if (EditorApplication.isPlaying)
         {
-            AddComponent<Image>();
+            enableAnimation = _enableAnimation;
         }
-        else if (objectType == ObjectType.RawImage)
-        {
-            AddComponent<RawImage>();
-        }
-        else if (objectType == ObjectType.Sprite2D)
-        {
-            AddComponent<SpriteRenderer>();
-        }
-        if (!UpdateIndex(_index))
-            _index = 0;
     }
 
-    private void RemoveComponent<T>()
+    private void disableAll()
     {
-        T comp = gameObject.GetComponent<T>();
-        if (comp != null)
+        var list = GetTargetObjects<GameObject>();
+        if (list == null) return;
+        foreach (var go in list)
         {
-            UnityEditor.EditorApplication.delayCall += () =>
-              {
-                  Component.DestroyImmediate(comp as Component);
-              };
+            if(go)
+                go.SetActive(false);
         }
     }
-    public static readonly Dictionary<int, string> propertyName = new Dictionary<int, string>()
-    {
-        {0, "gameObjects"},
-        {1, "texts"},
-        {2, "sprites"},
-        {3, "textures"},
-        {4, "sprites"},
-        {5, "shaders"},
-    };
 
-    private void ClearFields(string except)
+    private void ClearFields(ObjectType except)
     {
-        foreach (var d in propertyName)
+        var fieldsInfo = typeof(ObjectUnion).GetFields(System.Reflection.BindingFlags.Public
+                                                       | System.Reflection.BindingFlags.Instance);
+        foreach (var fi in fieldsInfo)
         {
-            if (d.Value == except)
+            if (fi.Name == except.ToString())
             {
                 continue;
             }
-            var fi = typeof(ObjectList).GetField(d.Value,
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            fi.SetValue(this, null);
-        }
-    }
 
-    private void OnValidate()
-    {
-        ClearFields(propertyName[(int)objectType]);
-        if (objectType == ObjectType.Text)
-        {
-            RemoveComponent<Image>();
-            RemoveComponent<RawImage>();
-            RemoveComponent<SpriteRenderer>();
+            Object obj = objects;
+            fi.SetValue(obj, null);
+            objects = (ObjectUnion)obj;
         }
-        else if (objectType == ObjectType.Image)
-        {
-            RemoveComponent<Text>();
-            RemoveComponent<RawImage>();
-            RemoveComponent<SpriteRenderer>();
-        }
-        else if (objectType == ObjectType.RawImage)
-        {
-            RemoveComponent<Text>();
-            RemoveComponent<Image>();
-            RemoveComponent<SpriteRenderer>();
-        }
-        else if (objectType == ObjectType.Sprite2D)
-        {
-            RemoveComponent<Text>();
-            RemoveComponent<Image>();
-            RemoveComponent<RawImage>();
-        }
-        StopAnimation();
-        if (Application.isPlaying)
-        {
-            OnEnable();
-        }
-        Invoke("AddComponent", 0.05f);
     }
 #endif
 }
